@@ -151,7 +151,3 @@ php artisan queue:work
 ```
 
 _(Catatan Teknis: Jika Anda melakukan perubahan pada kode Job/Notifikasi atau view PDF selama masa development, pastikan untuk me-restart worker dengan perintah `php artisan queue:restart` lalu jalankan kembali `queue:work`)._
-
-```
-
-```
