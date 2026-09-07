@@ -62,7 +62,7 @@ Kloning repositori ini dan instal dependensi PHP:
 
 ```bash
 git clone [https://github.com/RainerAdityatama/payment-gateway-web-backend.git](https://github.com/RainerAdityatama/payment-gateway-web-backend.git)
-cd NAMA_REPO_KAMU
+cd payment-gateway-web-backend
 composer install
 
 ```
