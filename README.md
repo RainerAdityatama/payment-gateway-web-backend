@@ -1,66 +1,149 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏟️ KelapaDua Sports - Payment Gateway & Booking API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem *backend* RESTful API untuk aplikasi pemesanan lapangan olahraga. Dibangun dengan fokus pada keandalan transaksi finansial, sistem ini mengintegrasikan *Payment Gateway* Midtrans untuk pemrosesan pembayaran otomatis, manajemen ketersediaan jadwal (*slotting*), serta pengiriman resi PDF asinkron menggunakan sistem *Queue*.
 
-## About Laravel
+## 🚀 Teknologi yang Digunakan
+- **Framework:** Laravel 11
+- **Authentication:** Laravel Sanctum (Token-based Auth)
+- **Payment Gateway:** Midtrans PHP (Snap & Core API)
+- **Background Jobs:** Laravel Queue (Database Driver)
+- **Document Generation:** DomPDF (barryvdh/laravel-dompdf)
+- **Email Testing:** Mailtrap SMTP
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ✨ Fitur Utama
+- **Manajemen Ketersediaan Real-time:** Pengecekan slot waktu lapangan yang dinamis berdasarkan tanggal untuk mencegah *double-booking*.
+- **Secure Checkout & Webhook:** Pemrosesan transaksi via Midtrans dengan pola *idempotency* untuk mencegah manipulasi atau duplikasi data status pembayaran.
+- **Asynchronous Email Notification:** Pembuatan struk PDF dan pengiriman email bukti pembayaran dilakukan di latar belakang (*background job*) agar respons API tetap cepat (non-blocking).
+- **Admin Dashboard API:** Endpoint khusus berotentikasi untuk manajemen data lapangan (CRUD).
+- **Rate Limiting (Throttle):** Proteksi *endpoint* dari serangan *spam* dan *brute-force* (Public: 60 req/min, Admin: 10 req/min).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 📡 Dokumentasi Endpoint API
 
-## Learning Laravel
+Semua respons API menggunakan format standar JSON. *Endpoint* Admin memerlukan *Header* `Authorization: Bearer <token>`.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 🔐 Autentikasi
+| Method | Endpoint | Deskripsi | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/auth/login` | Autentikasi admin & generate token | *Guest* |
+| `POST` | `/api/auth/logout` | Menghapus sesi / token saat ini | *Requires Auth* |
+| `GET`  | `/api/user` | Mengambil data user yang sedang login | *Requires Auth* |
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 🌐 Publik & Transaksi (Throttle: 60 req / min)
+| Method | Endpoint | Deskripsi | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `GET`  | `/api/public/lapangan` | Mengambil daftar semua lapangan | - |
+| `GET`  | `/api/public/lapangan/{slug}/kalender` | Melihat jadwal terisi dalam sebulan | - |
+| `GET`  | `/api/public/lapangan/{slug}/availability` | Mengecek slot jam kosong per tanggal | Kueri `?date=YYYY-MM-DD` |
+| `POST` | `/api/public/checkout` | Memproses pesanan & memanggil Snap Midtrans | - |
+| `POST` | `/api/public/webhook/midtrans` | *Endpoint* khusus menerima notifikasi Midtrans | *Bypass CSRF* |
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 🛡️ Admin Management (Throttle: 10 req / min)
+| Method | Endpoint | Deskripsi | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `GET`  | `/api/admin/lapangan` | Melihat daftar lapangan untuk dikelola | *Requires Auth* |
+| `POST` | `/api/admin/lapangan` | Menambahkan lapangan baru | *Requires Auth* |
+| `PUT`  | `/api/admin/lapangan/{lapangan}` | Memperbarui data lapangan | *Requires Auth* |
+| `DELETE`| `/api/admin/lapangan/{lapangan}`| Menghapus data lapangan | *Requires Auth* |
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🛠️ Cara Instalasi & Menjalankan (Lokal)
 
-### Premium Partners
+### 1. Persiapan Awal
+Kloning repositori ini dan instal dependensi PHP:
+```bash
+git clone [https://github.com/RainerAdityatama/NAMA_REPO_KAMU.git](https://github.com/RainerAdityatama/NAMA_REPO_KAMU.git)
+cd NAMA_REPO_KAMU
+composer install
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+```
 
-## Contributing
+### 2. Konfigurasi Environment (.env)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Salin file konfigurasi bawaan dan hasilkan *Application Key*:
 
-## Code of Conduct
+```bash
+cp .env.example .env
+php artisan key:generate
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```
 
-## Security Vulnerabilities
+Buka file `.env` dan konfigurasikan bagian berikut secara spesifik:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```env
+# Database
+DB_DATABASE=nama_database_lokal_anda
 
-## License
+# Konfigurasi Midtrans Sandbox
+MIDTRANS_SERVER_KEY="SB-Mid-server-xxxxxxxxx"
+MIDTRANS_CLIENT_KEY="SB-Mid-client-xxxxxxxxx"
+MIDTRANS_IS_PRODUCTION=false
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Konfigurasi Email (Mailtrap) & Queue
+QUEUE_CONNECTION=database
+MAIL_MAILER=smtp
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME="your_mailtrap_username"
+MAIL_PASSWORD="your_mailtrap_password"
+MAIL_ENCRYPTION=tls
+
+```
+
+### 3. Migrasi Database
+
+Jalankan migrasi untuk membangun struktur tabel dan antrean (pastikan database sudah dibuat di MySQL Anda):
+
+```bash
+php artisan migrate
+
+```
+
+### 4. Menjalankan Server Utama
+
+```bash
+php artisan serve
+
+```
+
+API akan berjalan di `http://127.0.0.1:8000`.
+
+---
+
+## 💳 Panduan Simulasi Pembayaran & Pengujian Asinkron (Localhost)
+
+Karena sistem ini bergantung pada notifikasi eksternal (*server-to-server*) dari Midtrans dan pemrosesan latar belakang (*Queue*), ikuti 3 langkah berikut agar alur *checkout* hingga pengiriman email PDF berjalan sempurna di komputer lokal:
+
+### Langkah 1: Buka Tunnel dengan Ngrok
+
+Agar Midtrans bisa mengirim data (Webhook) ke localhost Anda, jalankan Ngrok di terminal terpisah:
+
+```bash
+ngrok http 8000
+
+```
+
+*Salin URL Forwarding dari Ngrok (contoh: `https://xxxx.ngrok-free.app`).*
+
+### Langkah 2: Konfigurasi Dashboard Midtrans Sandbox
+
+1. Login ke Dashboard Midtrans Sandbox Anda.
+2. Masuk ke **Settings > Snap Preferences > System Settings**.
+3. Pada **Notification URL**, masukkan URL Ngrok ditambah rute webhook API:
+`https://xxxx.ngrok-free.app/api/public/webhook/midtrans`
+4. Pada **Finish / Unfinish / Error URL**, masukkan alamat URL aplikasi Frontend React Anda (contoh: `http://localhost:5173/pembayaran-sukses`).
+
+### Langkah 3: Jalankan Queue Worker
+
+Sistem menggunakan *Queue* agar respons webhook Midtrans sangat cepat (di bawah 1 detik). Pembuatan file PDF dan pengiriman email dilakukan oleh *worker*. Buka terminal terpisah dan jalankan:
+
+```bash
+php artisan queue:work
+
+```
+
+*(Catatan Teknis: Jika Anda melakukan perubahan pada kode Job/Notifikasi atau view PDF selama masa development, pastikan untuk me-restart worker dengan perintah `php artisan queue:restart` lalu jalankan kembali `queue:work`).*
+
+```
