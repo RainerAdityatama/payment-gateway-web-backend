@@ -61,7 +61,7 @@ Semua respons API menggunakan format standar JSON. _Endpoint_ Admin memerlukan _
 Kloning repositori ini dan instal dependensi PHP:
 
 ```bash
-git clone [https://github.com/RainerAdityatama/NAMA_REPO_KAMU.git](https://github.com/RainerAdityatama/NAMA_REPO_KAMU.git)
+git clone [https://github.com/RainerAdityatama/payment-gateway-web-backend.git](https://github.com/RainerAdityatama/payment-gateway-web-backend.git)
 cd NAMA_REPO_KAMU
 composer install
 
